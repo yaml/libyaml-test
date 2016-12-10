@@ -19,7 +19,17 @@ for dir in "${dirs[@]}"; do
     fi
   fi
   echo ">>> $dir"
-  ./libyaml-parser/libyaml-parser "$dir/in.yaml" > /tmp/test.out || {
+  tmpyaml="/tmp/yaml-test.yaml"
+  tmpevent="/tmp/yaml-test.event"
+  ./libyaml-emitter/libyaml-emitter "$dir/test.event" > "$tmpyaml" || {
+    (
+      set -x
+      cat "$dir/in.yaml"
+      cat "$dir/test.event"
+    )
+    exit 1
+  }
+  ./libyaml-parser/libyaml-parser "$tmpyaml" > "$tmpevent" || {
     (
       set -x
       cat "$dir/in.yaml"
@@ -28,12 +38,15 @@ for dir in "${dirs[@]}"; do
     exit 1
   }
   ok=true
-  output="$(${DIFF:-diff} -u $dir/test.event /tmp/test.out)" || ok=false
+  output="$(${DIFF:-diff} -u $dir/test.event "$tmpevent")" || ok=false
   if ! $ok; then
     echo "$output"
     exit 1
   fi
 done
+
+rm "$tmpyaml"
+rm "$tmpevent"
 
 echo PASS
 
