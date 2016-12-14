@@ -8,9 +8,10 @@ help:
 	@echo 'clean - Remove generated files'
 	@echo 'help  - Show help'
 
-test: data libyaml-parser/libyaml-parser libyaml-emitter/libyaml-emitter
-	bin/test-libyaml-parser.sh
-	bin/test-libyaml-emitter.sh
+test: data \
+           libyaml-parser/libyaml-parser \
+           libyaml-emitter/libyaml-emitter
+	prove -lv test
 
 clean:
 	rm -fr data libyaml-parser libyaml-emitter
