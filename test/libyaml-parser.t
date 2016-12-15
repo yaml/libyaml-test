@@ -17,7 +17,7 @@ for id in "${ids[@]}"; do
     echo "ok $((++count)) # SKIP $label"
     continue
   fi
-  ./libyaml-parser/libyaml-parser "$dir/in.yaml" > /tmp/test.out || {
+  ./libyaml-parser-emitter/libyaml-parser "$dir/in.yaml" > /tmp/test.out || {
     (
       cat "$dir/in.yaml"
       cat "$dir/test.event"

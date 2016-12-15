@@ -16,6 +16,5 @@ make test
 See:
 
 * https://github.com/yaml/libyaml
-* https://github.com/ingydotnet/libyaml-parser
-* https://github.com/ingydotnet/libyaml-emitter
+* https://github.com/yaml/libyaml-parser-emitter
 * https://github.com/yaml/yaml-test-suite
