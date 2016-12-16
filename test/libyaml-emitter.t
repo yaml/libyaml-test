@@ -32,7 +32,6 @@ for id in "${ids[@]}"; do
   else
     echo "not ok $((++count)) $label"
     echo "$output" | sed 's/^/# /'
-    exit
   fi
 done
 
