@@ -5,7 +5,7 @@ set -e
 if [[ $# -gt 0 ]]; then
   ids=("$@")
 else
-  ids=(`find data/ | grep '/===$' | cut -d/ -f2 | sort`)
+  ids=(`find data | grep '/===$' | cut -d/ -f2 | sort`)
 fi
 
 count=0
