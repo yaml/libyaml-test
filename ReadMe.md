@@ -3,6 +3,13 @@ LibYAML Test Runner
 
 Run libyaml-parser and libyaml-emitter against yaml-test-suite
 
+# Requirements
+
+* `prove` which should come by default on Debian variants, and might require
+  `perl-core` on Red Hat variants
+
+* `autotools`, `automake`, `libtool`, etc.
+
 # Synopsis
 
 ```
