@@ -10,9 +10,9 @@ help:
 	@echo 'clean - Remove generated files'
 	@echo 'help  - Show help'
 
-test: data \
-           libyaml-parser-emitter/libyaml-parser \
-           libyaml-parser-emitter/libyaml-emitter
+# Depends on parser and emitter but, building parser will also build emitter.
+# Building twice makes things fail.
+test: data libyaml-parser-emitter/libyaml-parser
 	(export LD_LIBRARY_PATH=$(LIBYAML_DIR)/src/.libs; prove -lv test)
 
 clean:
