@@ -11,9 +11,10 @@ help:
 	@echo 'help  - Show help'
 
 # Depends on parser and emitter but, building parser will also build emitter.
-# Building twice makes things fail.
+# Building twice makes things fail. Note: Some environments like on OS X, the
+# shell resets the {DY,}LD_LIBRARY_PATH vars, so we work around it like so:
 test: data libyaml-parser-emitter/libyaml-parser
-	(export LD_LIBRARY_PATH=$(LIBYAML_DIR)/src/.libs; prove -lv test)
+	(export MY_LD_LIBRARY_PATH=$(LIBYAML_DIR)/src/.libs; prove -lv test)
 
 clean:
 	rm -fr data libyaml-parser-emitter

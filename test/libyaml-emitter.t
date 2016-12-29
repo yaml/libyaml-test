@@ -8,6 +8,11 @@ else
   ids=(`find data | grep '/===$' | cut -d/ -f2 | sort`)
 fi
 
+# Some environments like on OS X, the shell resets the following vars, so we
+# work around it like so:
+export LD_LIBRARY_PATH="${MY_LD_LIBRARY_PATH:?}"
+export DYLD_LIBRARY_PATH="${MY_LD_LIBRARY_PATH:?}"
+
 count=0
 for id in "${ids[@]}"; do
   dir="data/$id"
