@@ -1,0 +1,29 @@
+name: linux/mac
+
+on:
+  push:
+    branches: [ '*' ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        compiler:
+        - gcc
+        - clang
+        os:
+        - ubuntu-latest
+        - macOS-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install software
+      run: |
+        if [[ '${{ matrix.os }}' == macOS-latest ]]; then
+          brew install automake bash coreutils make
+        fi
+    - run: make test

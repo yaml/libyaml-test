@@ -1,36 +1,33 @@
 #!/usr/bin/env bash
 
-set -e
+# shellcheck disable=1090,2034
 
-if [[ $# -gt 0 ]]; then
-  ids=("$@")
-else
-  ids=(`find data | grep '/===$' | cut -d/ -f2 | sort`)
-fi
+root=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
-count=0
-for id in "${ids[@]}"; do
-  dir="data/$id"
-  label="$id: $(< $dir/===)"
-  [[ -e "$dir/in.yaml" ]] || continue
-  if grep "$id" test/libyaml-parser.skip >/dev/null; then
-    echo "ok $((++count)) # SKIP $label"
-    continue
-  fi
-  ./libyaml-parser-emitter/libyaml-parser "$dir/in.yaml" > /tmp/test.out || {
+source "$root"/test-suite-runner.bash
+
+check-test() {
+  id=$1
+  t=data/$id
+
+  [[ " ${parser_list[*]} " == *\ $id\ * ]] || return 1
+  [[ -e $t/error ]] && return 1
+
+  return 0
+}
+
+run-test() {
+  dir=$1
+  ok=true
+
+  "${LIBYAML_ROOT}/tests/run-parser-test-suite" "$dir/in.yaml" > /tmp/test.out || {
     (
       cat "$dir/in.yaml"
       cat "$dir/test.event"
     ) | sed 's/^/# /'
   }
-  ok=true
-  output="$(${DIFF:-diff} -u $dir/test.event /tmp/test.out)" || ok=false
-  if $ok; then
-    echo "ok $((++count)) $label"
-  else
-    echo "not ok $((++count)) $label"
-    echo "$output" | sed 's/^/# /'
-  fi
-done
 
-echo "1..$count"
+  output=$(${DIFF:-diff} -u "$dir/test.event" /tmp/test.out) || ok=false
+}
+
+run-tests "$@"

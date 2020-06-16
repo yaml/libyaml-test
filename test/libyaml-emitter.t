@@ -1,43 +1,36 @@
 #!/usr/bin/env bash
 
-set -e
+# shellcheck disable=1090,2034
 
-if [[ $# -gt 0 ]]; then
-  ids=("$@")
-else
-  ids=(`find data | grep '/===$' | cut -d/ -f2 | sort`)
-fi
+root=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
-# Some environments like on OS X, the shell resets the following vars, so we
-# work around it like so:
-export LD_LIBRARY_PATH="${MY_LD_LIBRARY_PATH:?}"
-export DYLD_LIBRARY_PATH="${MY_LD_LIBRARY_PATH:?}"
+source "$root"/test-suite-runner.bash
 
-count=0
-for id in "${ids[@]}"; do
-  dir="data/$id"
-  label="$id: $(< $dir/===)"
-  [[ -e "$dir/in.yaml" ]] || continue
-  if grep "$id" test/libyaml-emitter.skip >/dev/null; then
-    echo "ok $((++count)) # SKIP $label"
-    continue
-  fi
-  want="$dir/out.yaml"
+check-test() {
+  id=$1
+  t=data/$id
+
+  [[ " ${emitter_list[*]} " == *\ $id\ * ]] || return 1
+  [[ -e $t/error ]] && return 1
+
+  return 0
+}
+
+run-test() {
+  dir=$1
+  ok=true
+
+  want=$dir/out.yaml
   [[ -e $want ]] || want="$dir/in.yaml"
-  ./libyaml-parser-emitter/libyaml-emitter "$dir/test.event" > /tmp/test.out || {
+
+  "${LIBYAML_ROOT:?}/tests/run-emitter-test-suite" "$dir/test.event" > /tmp/test.out || {
     (
       cat "$dir/test.event"
       cat "$want"
     ) | sed 's/^/# /'
   }
-  ok=true
-  output="$(${DIFF:-diff} -u $want /tmp/test.out)" || ok=false
-  if $ok; then
-    echo "ok $((++count)) $label"
-  else
-    echo "not ok $((++count)) $label"
-    echo "$output" | sed 's/^/# /'
-  fi
-done
 
-echo "1..$count"
+  output="$(${DIFF:-diff} -u "$want" /tmp/test.out)" || ok=false
+}
+
+run-tests "$@"

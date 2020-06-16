@@ -1,20 +1,22 @@
-LibYAML Test Runner
-===================
+libyaml-test
+============
 
-Run libyaml-parser and libyaml-emitter against yaml-test-suite
+Test libyaml against external test suites
 
 # Synopsis
 
 ```
-git clone https://github.com/yaml/libyaml-test
-cd libyaml-test
 make test
 ```
 
-# Overview
+From libyaml master branch:
 
-See:
+```
+./bootstrap
+./configure
+make test-suite
+```
 
-* https://github.com/yaml/libyaml
-* https://github.com/yaml/libyaml-parser-emitter
-* https://github.com/yaml/yaml-test-suite
+# Description
+
+This repo's job is to test libyaml against the `yaml-test-suite` and the test suites of projects that use libyaml, like PyYAML.

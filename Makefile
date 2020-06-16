@@ -1,29 +1,59 @@
+SHELL = bash
+
+ifeq ($(LIBYAML_ROOT),)
+  export LIBYAML_ROOT := libyaml
+else
+  ifeq ($(wildcard $(LIBYAML_ROOT)/src/yaml_private.h),)
+    $(error LIBYAML_ROOT=$(LIBYAML_ROOT) is not a libyaml repo clone directory)
+  endif
+endif
+
+export LIBYAML_REPO ?= https://github.com/yaml/libyaml
+export LIBYAML_COMMIT ?= master
+
+PARSER_TEST := $(LIBYAML_ROOT)/tests/run-parser-test-suite
+
+# .ONESHELL is great but needs make 4.1+
+# .ONESHELL:
 .PHONY: test
-GITHUB_ORG_URI := https://github.com/yaml
-TEST_SUITE_URL := $(GITHUB_ORG_URI)/yaml-test-suite
-LIBYAML_DIR ?= $(PWD)/libyaml-parser-emitter/libyaml
+test: test-suite
 
-default: help
+test-suite: $(PARSER_TEST) data
+	( \
+	  export LIBYAML_TEST_SUITE_ENV=$$(LIBYAML_TEST_SUITE_ENV=$(debug) ./bin/lookup env); \
+	  [[ $$LIBYAML_TEST_SUITE_ENV ]] || exit 1; \
+	  prove -v test/; \
+	  [[ $$LIBYAML_TEST_SUITE_ENV != env/default ]] || \
+	    ./bin/lookup default-warning \
+	)
 
-help:
-	@echo 'test  - Run the tests'
-	@echo 'clean - Remove generated files'
-	@echo 'help  - Show help'
+test-all:
+	prove -v test/test-all.sh
 
-# Depends on parser and emitter but, building parser will also build emitter.
-# Building twice makes things fail. Note: Some environments like on OS X, the
-# shell resets the {DY,}LD_LIBRARY_PATH vars, so we work around it like so:
-test: data libyaml-parser-emitter/libyaml-parser
-	(export MY_LD_LIBRARY_PATH=$(LIBYAML_DIR)/src/.libs; prove -lv test)
+$(PARSER_TEST): $(LIBYAML_ROOT)
+	( \
+	  cd $< && \
+	  ./bootstrap && \
+	  ./configure && \
+	  make all \
+	)
 
-clean:
-	rm -fr data libyaml-parser-emitter
+$(LIBYAML_ROOT):
+	git clone $(LIBYAML_REPO) $@
+	( \
+	  cd $@ && \
+	  git reset --hard $(LIBYAML_COMMIT) \
+	)
 
 data:
-	git clone $(TEST_SUITE_URL) $@ --branch=$@
+	( \
+	  data=$$(LIBYAML_TEST_SUITE_DEBUG=$(debug) ./bin/lookup data); repo=$${data%\ *}; commit=$${data#*\ }; \
+	  [[ $$repo && $$commit ]] || exit 1; \
+	  echo "repo=$$repo commit=$$commit"; \
+	  git clone $$repo $@; \
+	  cd $@ && git reset --hard $$commit \
+	)
 
-%/libyaml-parser %/libyaml-emitter: %
-	(cd $<; make build)
-
-libyaml-parser-emitter:
-	git clone $(GITHUB_ORG_URI)/$@ $@
+clean:
+	rm -fr data libyaml
+	rm -f env/tmp-*
