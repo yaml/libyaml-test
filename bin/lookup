@@ -151,7 +151,7 @@ Using the default test-suite env:
 
   env/$default
 
-No test-suite environment info was found for the HEAD of '$main_branch':
+No test-suite environment info was found for the HEAD of libyaml '$main_branch':
 
   $head
 

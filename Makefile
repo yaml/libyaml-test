@@ -2,19 +2,18 @@ SHELL = bash
 
 ifeq ($(LIBYAML_ROOT),)
   export LIBYAML_ROOT := libyaml
+  export LIBYAML_REPO ?= https://github.com/yaml/libyaml
+  export LIBYAML_COMMIT ?= master
 else
   ifeq ($(wildcard $(LIBYAML_ROOT)/src/yaml_private.h),)
     $(error LIBYAML_ROOT=$(LIBYAML_ROOT) is not a libyaml repo clone directory)
   endif
 endif
 
-export LIBYAML_REPO ?= https://github.com/yaml/libyaml
-export LIBYAML_COMMIT ?= master
-
 PARSER_TEST := $(LIBYAML_ROOT)/tests/run-parser-test-suite
 
-# .ONESHELL is great but needs make 4.1+
-# .ONESHELL:
+
+
 .PHONY: test
 test: test-suite
 
@@ -26,9 +25,6 @@ test-suite: $(PARSER_TEST) data
 	  [[ $$LIBYAML_TEST_SUITE_ENV != env/default ]] || \
 	    ./bin/lookup default-warning \
 	)
-
-test-all:
-	prove -v test/test-all.sh
 
 $(PARSER_TEST): $(LIBYAML_ROOT)
 	( \
