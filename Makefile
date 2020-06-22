@@ -43,7 +43,7 @@ $(LIBYAML_ROOT):
 
 data:
 	( \
-	  data=$$(LIBYAML_TEST_SUITE_DEBUG=$(debug) ./bin/lookup data); repo=$${data%\ *}; commit=$${data#*\ }; \
+	  data=$$(LIBYAML_TEST_SUITE_DEBUG=$(debug) ./bin/lookup data); repo=$${data%\ *}; commit=$${data/*\ /}; \
 	  [[ $$repo && $$commit ]] || exit 1; \
 	  echo "repo=$$repo commit=$$commit"; \
 	  git clone $$repo $@; \
